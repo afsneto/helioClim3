@@ -4,9 +4,12 @@ from pandas.tseries import converter
 
 from tqdm import tqdm
 from datetime import datetime
+from calendar import monthrange
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+import swifter
 
 
 class helioclim3:
@@ -39,12 +42,13 @@ class helioclim3:
             pass
 
         tqdm.pandas()
-        df.loc[:, "Date"] = df.Date.progress_apply(self.fixHours)
+        # df.loc[:, "Date"] = df.Date.progress_apply(self.fixHours)
+        df.loc[:, "Date"] = df.Date.swifter.apply(self.fixHours)
         # Assign "Date" column to index
         df.set_index("Date", inplace=True)
         return df
 
-    def plotdata(self, date1: str, date2: str, data='Global Horiz'):
+    def plot(self, date1: str, date2: str, data='Global Horiz'):
         df = self.processing(datafix=True)
         converter.register()
 
@@ -97,11 +101,47 @@ class helioclim3:
             print("{0}: {1} - {2:2.1f}%".format(
                 idbyCode[i], numberbyCode[i], (numberbyCode[i] / totalIrrad)*100))
 
+    def averSolarIrrad(self, freq='H'):
+        # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#anchored-offsets
 
-data = helioclim3(
-    'NORTE-MINAS_HC3-METEOhour_lat-15.576_lon-43.591_2004-02-01_2019-11-28_hz1.csv')
+        df = self.processing()
 
-d1 = '2005-02-01'
-d2 = '2006-02-02'
-data.plotdata(d1, d2)
-data.analysis()
+        # Calculo da media para cada mes
+        Wh_m2_mes = df.groupby(df.index.month).mean()['Global Horiz']
+        kWh_m2_dia = df.groupby(df.index.month).mean()[
+            'Global Horiz'] * 24/1000
+        Months = Wh_m2_mes.index.to_list()
+
+        result = {'kWh/m²_Diário': kWh_m2_dia,
+                  'kWh/m²_Mensal': Wh_m2_mes, 'Month': Months}
+        dfIrrad = pd.DataFrame(result)
+        print(dfIrrad)
+        print('Média diária Irradiação Solar: {0:.2f} kWh/m²/dia'.format(
+            dfIrrad.loc[:, 'kWh/m²_Diário'].mean()))
+
+        # kWh_Day = []
+        # daysinMonth = []
+        # kWh_Month = []
+        # Month = []
+
+        # # dfDay = dfHour.resample('D').mean()*24/1000
+        # # kWh_Day.append(dfDay[dfDay.index.month == i].mean())
+
+        # for i in sorted(set(dfMonth.index.month)):
+        #     Month.append(int(i))
+        #     # kWh_Day: media mensal considerando todos os anos
+        #     kWh_Day.append(dfMonth[dfMonth.index.month == i].mean())
+        #     # daysinMonth: numero de dias para cada mês
+        #     daysinMonth.append(monthrange(dfMonth.index.year.max(), i)[1])
+
+        #     kWh_Month.append(dfMonth[dfMonth.index.month == i].mean(
+        #     ) * monthrange(dfMonth.index.year.max(), i)[1])
+
+        # result = {'kWh/m²_Diário': kWh_Day,
+        #           'kWh/m²_Mensal': kWh_Month, 'Month': Month}
+
+        # dfIrrad = pd.DataFrame(result)
+
+        # print(dfIrrad.head(12))
+        # print('Média diária Irradiação Solar: {0:.2f} kWh/m²/dia'.format(
+        #     dfIrrad.loc[:, 'kWh/m²_Diário'].mean()))
