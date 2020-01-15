@@ -118,30 +118,3 @@ class helioclim3:
         print(dfIrrad)
         print('Média diária Irradiação Solar: {0:.2f} kWh/m²/dia'.format(
             dfIrrad.loc[:, 'kWh/m²_Diário'].mean()))
-
-        # kWh_Day = []
-        # daysinMonth = []
-        # kWh_Month = []
-        # Month = []
-
-        # # dfDay = dfHour.resample('D').mean()*24/1000
-        # # kWh_Day.append(dfDay[dfDay.index.month == i].mean())
-
-        # for i in sorted(set(dfMonth.index.month)):
-        #     Month.append(int(i))
-        #     # kWh_Day: media mensal considerando todos os anos
-        #     kWh_Day.append(dfMonth[dfMonth.index.month == i].mean())
-        #     # daysinMonth: numero de dias para cada mês
-        #     daysinMonth.append(monthrange(dfMonth.index.year.max(), i)[1])
-
-        #     kWh_Month.append(dfMonth[dfMonth.index.month == i].mean(
-        #     ) * monthrange(dfMonth.index.year.max(), i)[1])
-
-        # result = {'kWh/m²_Diário': kWh_Day,
-        #           'kWh/m²_Mensal': kWh_Month, 'Month': Month}
-
-        # dfIrrad = pd.DataFrame(result)
-
-        # print(dfIrrad.head(12))
-        # print('Média diária Irradiação Solar: {0:.2f} kWh/m²/dia'.format(
-        #     dfIrrad.loc[:, 'kWh/m²_Diário'].mean()))
